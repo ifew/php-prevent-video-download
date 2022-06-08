@@ -9,7 +9,6 @@ Tested on Chrome 102.0.5005.61 (Official Build) (x86_64), Safari  15.4 (17613.1.
 ## Prequisition
 - PHP 8
 
-
 ## How to use
  - Download this code and extract all files
  - Open index.php
