@@ -15,6 +15,7 @@ $size   = filesize($file); // File size
 $length = $size;           // Content length
 $start  = 0;               // Start byte
 $end    = $size - 1;       // End byte
+$fp = @fopen($file, 'rb');
 
 header('Content-type: video/mp4');
 header("Accept-Ranges: 0-$length");
@@ -50,12 +51,11 @@ if (isset($_SERVER['HTTP_RANGE'])) {
     header("Content-Range: bytes $start-$end/$size");
     header("Content-Length: ".$length);
 
-    $opts['http']['header'] = "Range: bytes=" . ($begin-$end)/$size . ",
+    $opts['http']['header'] = "Range: bytes=" . ($start-$end)/$size . ",
     Content-Type: video/mp4,
     Accept-Ranges: bytes,
     Content-Disposition: inline;,
     Content-Transfer-Encoding: binary\n,".
-    $header_http.",".
     "Connection: close";
 
     $opts['http']['method'] = "GET";
