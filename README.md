@@ -1,10 +1,14 @@
 # Prevent user download video from browser (HTML5, PHP)
 
-Tested on Chrome 78.0.3904.97, Safari 13.0.2 (15608.2.30.1.1)
+Tested on Chrome 102.0.5005.61 (Official Build) (x86_64), Safari  15.4 (17613.1.17.1.13)
 
 ![Chrome](tested_chrome.png)
 
 ![Safari](tested_safari.png)
+
+## Prequisition
+- PHP 8
+
 
 ## How to use
  - Download this code and extract all files
