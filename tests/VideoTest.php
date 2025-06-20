@@ -66,7 +66,7 @@ final class VideoTest extends TestCase
         $headers = [];
         $result = defaprotect_serve_video(
             $_SESSION,
-            ['HTTP_RANGE' => 'bytes=10000-10001'],
+            ['HTTP_RANGE' => 'bytes=1000000-1000001'],
             $crc,
             function (string $h) use (&$headers) { $headers[] = $h; },
             function () { /* ignore */ }
