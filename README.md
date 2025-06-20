@@ -7,7 +7,8 @@ Tested on Chrome 102.0.5005.61 (Official Build) (x86_64), Safari  15.4 (17613.1.
 ![Safari](tested_safari.png)
 
 ## Prequisition
-- PHP 8
+- PHP 8.4.8 or higher
+- PSR-12 compliance
 
 ## How to use
  - Download this code and extract all files

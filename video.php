@@ -1,68 +1,83 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) {
+
+declare(strict_types=1);
+
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 ob_start();
-$crc = filter_var($_GET['crc']);
-$file = $_SESSION['defaprotect' . $crc];
-if ($headerurl = @get_headers($file, 1)['Location']) {
-    if (!empty($headerurl)) {
-        $file = $headerurl;
-    }
 
+$crc  = filter_input(INPUT_GET, 'crc', FILTER_SANITIZE_STRING);
+$file = $_SESSION['defaprotect' . $crc] ?? '';
+
+$headers = @get_headers($file, true);
+if ($headers !== false && !empty($headers['Location'])) {
+    $file = $headers['Location'];
 }
-$size   = filesize($file); // File size
-$length = $size;           // Content length
-$start  = 0;               // Start byte
-$end    = $size - 1;       // End byte
-$fp = @fopen($file, 'rb');
 
-header('Content-type: video/mp4');
-header("Accept-Ranges: 0-$length");
+$size   = filesize($file);
+$length = $size;
+$start  = 0;
+$end    = $size - 1;
+$fp     = @fopen($file, 'rb');
+
+header('Content-Type: video/mp4');
+header('Accept-Ranges: bytes');
+
 if (isset($_SERVER['HTTP_RANGE'])) {
-    if (isset($_SERVER['HTTP_RANGE'])) {
-        $c_start = $start;
-        $c_end   = $end;
-        list(, $range) = explode('=', $_SERVER['HTTP_RANGE'], 2);
-        if (strpos($range, ',') !== false) {
-            header('HTTP/1.1 416 Requested Range Not Satisfiable');
-            header("Content-Range: bytes $start-$end/$size");
-            exit;
-        }
-        if ($range == '-') {
-            $c_start = $size - substr($range, 1);
-        }else{
-            $range  = explode('-', $range);
-            $c_start = $range[0];
-            $c_end   = (isset($range[1]) && is_numeric($range[1])) ? $range[1] : $size;
-        }
-        $c_end = ($c_end > $end) ? $end : $c_end;
-        if ($c_start > $c_end || $c_start > $size - 1 || $c_end >= $size) {
-            header('HTTP/1.1 416 Requested Range Not Satisfiable');
-            header("Content-Range: bytes $start-$end/$size");
-            exit;
-        }
-        $start  = $c_start;
-        $end    = $c_end;
-        $length = $end - $start + 1;
-        fseek($fp, $start);
-        header('HTTP/1.1 206 Partial Content');
+    $cStart = $start;
+    $cEnd   = $end;
+
+    [, $range] = explode('=', $_SERVER['HTTP_RANGE'], 2);
+    if (strpos($range, ',') !== false) {
+        header('HTTP/1.1 416 Requested Range Not Satisfiable');
+        header("Content-Range: bytes $start-$end/$size");
+        exit;
     }
-    header("Content-Range: bytes $start-$end/$size");
-    header("Content-Length: ".$length);
 
-    $opts['http']['header'] = "Range: bytes=" . ($start-$end)/$size . ",
-    Content-Type: video/mp4,
-    Accept-Ranges: bytes,
-    Content-Disposition: inline;,
-    Content-Transfer-Encoding: binary\n,".
-    "Connection: close";
+    if ($range === '-') {
+        $cStart = $size - substr($range, 1);
+    } else {
+        $rangeParts = explode('-', $range);
+        $cStart     = (int) $rangeParts[0];
+        $cEnd       = isset($rangeParts[1]) && is_numeric($rangeParts[1])
+            ? (int) $rangeParts[1]
+            : $size;
+    }
 
-    $opts['http']['method'] = "GET";
-    $cong = stream_context_create($opts);
-    ob_end_clean();
-    
-    readfile($file, false, $cong);
-    
-    exit();
+    $cEnd = ($cEnd > $end) ? $end : $cEnd;
+    if ($cStart > $cEnd || $cStart > $size - 1 || $cEnd >= $size) {
+        header('HTTP/1.1 416 Requested Range Not Satisfiable');
+        header("Content-Range: bytes $start-$end/$size");
+        exit;
+    }
+
+    $start  = $cStart;
+    $end    = $cEnd;
+    $length = $end - $start + 1;
+    fseek($fp, $start);
+
+    header('HTTP/1.1 206 Partial Content');
 }
+
+header("Content-Range: bytes $start-$end/$size");
+header("Content-Length: $length");
+
+$opts = [
+    'http' => [
+        'header' => sprintf(
+            "Range: bytes=%d-%d\r\nContent-Type: video/mp4\r\nAccept-Ranges: bytes\r\nContent-Disposition: inline\r\nContent-Transfer-Encoding: binary\r\nConnection: close",
+            $start,
+            $end
+        ),
+        'method' => 'GET',
+    ],
+];
+$cong = stream_context_create($opts);
+
+ob_end_clean();
+
+readfile($file, false, $cong);
+
+exit;
