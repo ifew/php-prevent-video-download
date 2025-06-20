@@ -19,6 +19,7 @@ final class WrapperTest extends TestCase
         ob_start();
         include __DIR__ . '/../wrapper.php';
         echo '<video src="small.mp4"></video>';
+        ob_end_flush();
         $output = ob_get_clean();
 
         $crc = substr(sha1('small.mp4'), -8, -1);
@@ -33,6 +34,7 @@ final class WrapperTest extends TestCase
         ob_start();
         include __DIR__ . '/../wrapper.php';
         echo '<safe><video src="small.mp4"></video></safe>';
+        ob_end_flush();
         $output = ob_get_clean();
 
         $this->assertSame('<safe><video src="small.mp4"></video></safe>', $output);

@@ -27,17 +27,17 @@ if (!function_exists('defaprotect_transform_output')) {
             };
 
             $output = preg_replace_callback(
-                '/(<video[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
+                '/(<video[^>]*src *= *["\']?)([^"\']*)/i',
                 $getUrl,
                 $output
             );
             $output = preg_replace_callback(
-                '/(<source[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
+                '/(<source[^>]*src *= *["\']?)([^"\']*)/i',
                 $getUrl,
                 $output
             );
             $output = preg_replace_callback(
-                '/(<audio[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
+                '/(<audio[^>]*src *= *["\']?)([^"\']*)/i',
                 $getUrl,
                 $output
             );
