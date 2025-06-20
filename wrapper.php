@@ -6,8 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-ob_start(
-    static function (string $output): string {
+if (!function_exists('defaprotect_transform_output')) {
+    /**
+     * Transform video, audio and source tags so that their sources point to the
+     * protected streaming endpoint.
+     */
+    function defaprotect_transform_output(string $output): string
+    {
         if (
             (strpos($output, '<video') > -1 ||
                 strpos($output, '<audio') > -1 ||
@@ -22,17 +27,17 @@ ob_start(
             };
 
             $output = preg_replace_callback(
-                '/(<video[^>]*src *= *[\"\']?)([^\"\']*)/i',
+                '/(<video[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
                 $getUrl,
                 $output
             );
             $output = preg_replace_callback(
-                '/(<source[^>]*src *= *[\"\']?)([^\"\']*)/i',
+                '/(<source[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
                 $getUrl,
                 $output
             );
             $output = preg_replace_callback(
-                '/(<audio[^>]*src *= *[\"\']?)([^\"\']*)/i',
+                '/(<audio[^>]*src *= *[\\"\\']?)([^\\"\\']*)/i',
                 $getUrl,
                 $output
             );
@@ -40,5 +45,6 @@ ob_start(
 
         return $output;
     }
-);
+}
 
+ob_start('defaprotect_transform_output');

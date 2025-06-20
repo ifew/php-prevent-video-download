@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <file>wrapper.php</file>
+            <file>video.php</file>
+        </include>
+    </coverage>
+</phpunit>
